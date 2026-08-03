@@ -67,4 +67,4 @@ Frontend (React + TailwindCSS): [Project-management-frontend](https://github.com
 
 ## Status
 
-Practice project — actively developed locally. Deployment coming soon.
+Practice project — actively developed locally.
