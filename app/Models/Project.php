@@ -12,9 +12,10 @@ class Project extends Model
         'name',
         'description',
         'due_date',
+        'user_id',
     ];
 
-    public function task(){
+    public function tasks(){
         return $this->hasMany(Task::class);
     }
 }

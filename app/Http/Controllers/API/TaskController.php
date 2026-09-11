@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Task;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
 
 class TaskController extends Controller
 {
@@ -15,7 +16,7 @@ class TaskController extends Controller
     public function index()
     {
         //
-        $task = Task::with('project')->get();
+        $task = Task::with('project')->where('user_id', Auth::id())->get();
 
         return response()->json($task, 200);
     }
@@ -30,7 +31,6 @@ class TaskController extends Controller
             'project_id' => 'required|exists:projects,id',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'status' => 'in:pending,in_progress,completed',
             'due_date' => 'nullable|date',
         ]);
 
@@ -39,8 +39,13 @@ class TaskController extends Controller
                 'message' => $validator->errors()
             ], 400);
         }
+        $data['project_id'] = $request->project_id;
+        $data['title'] = $request->title;
+        $data['description'] = $request->description;
+        $data['due_date'] = $request->due_date;
+        $data['user_id'] = Auth::id(); // assign logged-in used ID
 
-        $task = Task::create($request->all());
+        $task = Task::create($data);
 
         return response()->json($task, 201);
     }
@@ -95,6 +100,7 @@ class TaskController extends Controller
         $task->description = $request->description;
         $task->status = $request->status;
         $task->due_date = $request->due_date;
+        $task->user_id = Auth::id(); // assign logged-in used ID
         $task->save();
 
         return response()->json([

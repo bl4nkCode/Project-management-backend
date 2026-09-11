@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
 
 class ProjectController extends Controller
 {
@@ -15,7 +16,8 @@ class ProjectController extends Controller
     public function index()
     {
         //
-        return response()->json(Project::all(), 200);
+        $projects = Project::where('user_id', Auth::id())->get();
+        return response()->json($projects, 200);
     }
 
     /**
@@ -35,7 +37,12 @@ class ProjectController extends Controller
             ], 400);
         }
 
-        $project = Project::create($request->all());
+        $data['name'] = $request->name;
+        $data['description'] = $request->description;
+        $data['due_date'] = $request->due_date;
+        $data['user_id'] = Auth::id(); // assign logged-in used ID
+
+        $project = Project::create($data);
         return response()->json($project, 201);
     }
 
@@ -45,7 +52,7 @@ class ProjectController extends Controller
     public function show(string $id)
     {
         // error 404 ug wla ma find ang project
-        $project = Project::find($id);
+        $project = Project::with('tasks')->find($id);
         if (!$project) {
             return response()->json(['message' => 'Project not found'], 404);
         }
@@ -82,6 +89,7 @@ class ProjectController extends Controller
             'name' => $request->name,
             'description' => $request->description,
             'due_date' => $request->due_date,
+            'user_id' => Auth::id(),
         ]);
 
         return response()->json([
